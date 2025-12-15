@@ -39,7 +39,7 @@ const LoginForm: React.FC = () => {
 
             localStorage.setItem('userEmail', user.email);
 
-            router.push('/');
+            router.push('./devices');
 
         } catch (err) {
             setError((err as Error).message);

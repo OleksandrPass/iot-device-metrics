@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { useRouter } from 'next/navigation';
 import { RegisterFormData } from '../types/auth';
+import Link from 'next/link';
 
 
 const EXTERNAL_REGISTER_API = ' http://localhost:3000/api/users';
@@ -74,6 +75,22 @@ const SignUpForm: React.FC = () => {
             <button type="submit" disabled={isSubmitting} style={{ marginTop: '15px' }}>
                 {isSubmitting ? 'Registering...' : 'Sign Up'}
             </button>
+
+            <div style={{ marginTop: '20px', textAlign: 'center' }}>
+                <p style={{marginBottom: '10px'}}>Already have an account?</p>
+                {/* Use the Next.js Link component for client-side routing */}
+                <Link href="/log-in" passHref style={{
+                    display: 'block',
+                    padding: '10px',
+                    backgroundColor: '#ddd',
+                    color: '#333',
+                    textDecoration: 'none',
+                    borderRadius: '4px',
+                    border: '1px solid #ccc'
+                }}>
+                    Go to Log In
+                </Link>
+            </div>
         </form>
     );
 };
