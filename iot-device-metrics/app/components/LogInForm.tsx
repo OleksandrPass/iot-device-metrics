@@ -3,9 +3,10 @@
 import React, { useState } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { useRouter } from 'next/navigation';
-import { LoginFormData, UserResponse } from '../types/auth'; // Ensure UserResponse is imported
+import { LoginFormData, UserResponse } from '../types/auth';
+import Link from "next/link";
 
-const EXTERNAL_LOGIN_API = ' http://localhost:3000/api/auth/login';
+const EXTERNAL_LOGIN_API = 'http://51.103.231.79:3000/api/auth/login';
 
 const LoginForm: React.FC = () => {
     const router = useRouter();
@@ -36,10 +37,11 @@ const LoginForm: React.FC = () => {
 
             localStorage.setItem('authToken', token);
             localStorage.setItem('userId', user.id);
+            localStorage.setItem('username', user.username);
 
             localStorage.setItem('userEmail', user.email);
 
-            router.push('/');
+            router.push('./devices');
 
         } catch (err) {
             setError((err as Error).message);
@@ -61,6 +63,21 @@ const LoginForm: React.FC = () => {
             <button type="submit" disabled={isSubmitting}>
                 {isSubmitting ? 'Logging in...' : 'Log In'}
             </button>
+
+            <div style={{ marginTop: '20px', textAlign: 'center' }}>
+                <p style={{marginBottom: '10px'}}>Don't have an account?</p>
+                <Link href="/sign-up" passHref style={{
+                    display: 'block',
+                    padding: '10px',
+                    backgroundColor: '#ddd',
+                    color: '#333',
+                    textDecoration: 'none',
+                    borderRadius: '4px',
+                    border: '1px solid #ccc'
+                }}>
+                    Go to Sign Up
+                </Link>
+            </div>
         </form>
     );
 };
