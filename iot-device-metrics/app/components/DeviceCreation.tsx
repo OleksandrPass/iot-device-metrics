@@ -3,7 +3,6 @@
 import React, { useState } from 'react';
 import { Device } from '../types/device';
 
-// API Endpoint (Remains the same for POST)
 const CREATE_DEVICE_API_URL = 'http://51.103.231.79:3000/api/devices';
 
 interface DeviceCreateFormProps {
@@ -16,7 +15,6 @@ const DeviceCreateForm: React.FC<DeviceCreateFormProps> = ({ token, onClose, onD
     const [name, setName] = useState('');
     const [description, setDescription] = useState('');
     const [locationName, setLocationName] = useState('');
-
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [formError, setFormError] = useState<string | null>(null);
 
@@ -38,7 +36,6 @@ const DeviceCreateForm: React.FC<DeviceCreateFormProps> = ({ token, onClose, onD
                     'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json',
                 },
-                // Updated payload to include description and locationName
                 body: JSON.stringify({ name, description, locationName }),
             });
 
@@ -63,7 +60,6 @@ const DeviceCreateForm: React.FC<DeviceCreateFormProps> = ({ token, onClose, onD
             <h3 className="text-lg font-bold mb-4 text-blue-800">Register New Device</h3>
             <form onSubmit={handleSubmit} className="space-y-4">
 
-                {/* 1. Device Name */}
                 <div>
                     <label className="block text-sm font-medium text-gray-700" htmlFor="deviceName">Device Name</label>
                     <input
@@ -76,7 +72,6 @@ const DeviceCreateForm: React.FC<DeviceCreateFormProps> = ({ token, onClose, onD
                     />
                 </div>
 
-                {/* 2. Device Description (New Field) */}
                 <div>
                     <label className="block text-sm font-medium text-gray-700" htmlFor="deviceDescription">Device Description</label>
                     <textarea
@@ -89,7 +84,6 @@ const DeviceCreateForm: React.FC<DeviceCreateFormProps> = ({ token, onClose, onD
                     />
                 </div>
 
-                {/* 3. Location Name (New Field) */}
                 <div>
                     <label className="block text-sm font-medium text-gray-700" htmlFor="locationName">Location Name</label>
                     <input

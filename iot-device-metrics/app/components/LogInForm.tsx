@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { useRouter } from 'next/navigation';
 import { LoginFormData, UserResponse } from '../types/auth';
-import Link from "next/link"; // Ensure UserResponse is imported
+import Link from "next/link";
 
 const EXTERNAL_LOGIN_API = 'http://51.103.231.79:3000/api/auth/login';
 
@@ -37,6 +37,7 @@ const LoginForm: React.FC = () => {
 
             localStorage.setItem('authToken', token);
             localStorage.setItem('userId', user.id);
+            localStorage.setItem('username', user.username);
 
             localStorage.setItem('userEmail', user.email);
 

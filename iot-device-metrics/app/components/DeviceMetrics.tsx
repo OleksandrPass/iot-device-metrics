@@ -1,9 +1,7 @@
-﻿// components/DeviceMetrics.tsx
+﻿'use client';
 
-'use client';
-
-import React from 'react';
-import { Device, Metric } from '../types/device'; // Ensure correct path
+import React, { useState } from 'react';
+import { Device, Metric } from '../types/device';
 
 interface DeviceMetricsProps {
     devices: Device[];
@@ -12,25 +10,62 @@ interface DeviceMetricsProps {
     metrics: Metric[] | null;
     loading: boolean;
     handleDeviceSelect: (e: React.ChangeEvent<HTMLSelectElement>) => void;
+    handleDeleteDevice: (deviceId: string) => void; // Added for deletion
     initialMetricsLoaded: React.MutableRefObject<boolean>;
     pollingInterval: number;
+    showCreateForm: boolean;
 }
 
 const DeviceMetrics: React.FC<DeviceMetricsProps> = ({
                                                          devices,
                                                          selectedDeviceId,
-                                                         selectedDevice, // Destructure the new prop
+                                                         selectedDevice,
                                                          metrics,
                                                          loading,
                                                          handleDeviceSelect,
+                                                         handleDeleteDevice,
                                                          initialMetricsLoaded,
                                                          pollingInterval,
+                                                         showCreateForm,
                                                      }) => {
+    const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+
+    const onConfirmDelete = () => {
+        if (selectedDeviceId) {
+            handleDeleteDevice(selectedDeviceId);
+        }
+        setShowDeleteConfirm(false);
+    };
+
     return (
         <>
+            {showDeleteConfirm && selectedDevice && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                    <div className="bg-white p-8 rounded-lg shadow-2xl max-w-md w-full">
+                        <h3 className="text-xl font-bold text-red-700 mb-4">Confirm Deletion</h3>
+                        <p className="mb-6">Are you sure you want to permanently delete **{selectedDevice.name}**? This action cannot be undone.</p>
+                        <div className="flex justify-end space-x-4">
+                            <button
+                                onClick={() => setShowDeleteConfirm(false)}
+                                className="px-4 py-2 border rounded-md text-gray-700 hover:bg-gray-100"
+                                disabled={loading}
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={onConfirmDelete}
+                                className="px-4 py-2 border rounded-md text-white bg-red-600 hover:bg-700 disabled:opacity-50"
+                                disabled={loading}
+                            >
+                                {loading ? 'Deleting...' : 'Permanently Delete'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             <p className="text-sm text-gray-500">Metrics are updated every {pollingInterval / 1000} seconds.</p>
 
-            {/* Device Selection Dropdown */}
             <div className="flex items-center space-x-4">
                 <label htmlFor="device-select" className="font-semibold">Select Device:</label>
                 <select
@@ -38,7 +73,7 @@ const DeviceMetrics: React.FC<DeviceMetricsProps> = ({
                     onChange={handleDeviceSelect}
                     value={selectedDeviceId || ''}
                     className="p-2 border border-gray-300 rounded"
-                    disabled={loading || !devices.length}
+                    disabled={loading || !devices.length || showCreateForm || showDeleteConfirm}
                 >
                     <option value="" disabled>
                         {loading && !devices.length ? 'Fetching devices...' : 'Choose a Device'}
@@ -49,28 +84,34 @@ const DeviceMetrics: React.FC<DeviceMetricsProps> = ({
                         </option>
                     ))}
                 </select>
+
+                {selectedDeviceId && (
+                    <button
+                        onClick={() => setShowDeleteConfirm(true)}
+                        className="px-4 py-2 bg-red-600 text-white font-semibold rounded-md shadow hover:bg-red-700 transition disabled:opacity-50"
+                        disabled={loading || showCreateForm || showDeleteConfirm}
+                    >
+                        Delete Device
+                    </button>
+                )}
             </div>
 
-            {/* Metrics Display Panel */}
             {selectedDeviceId && (
                 <div className="mt-8 p-6 border rounded-lg shadow-md">
                     <h2 className="text-xl font-bold mb-4">Metrics for Device: {selectedDevice?.name || selectedDeviceId}</h2>
 
-                    {/* NEW: Display Description and Location */}
                     {selectedDevice && (
                         <div className="mb-4 p-3 bg-white border rounded-md text-sm space-y-1">
                             <p><strong>Location:</strong> {selectedDevice.locationName || 'N/A'}</p>
                             <p><strong>Description:</strong> {selectedDevice.description || 'No description provided.'}</p>
                         </div>
                     )}
-                    {/* END NEW */}
 
                     {(loading && !initialMetricsLoaded.current) && <p>Fetching initial metrics...</p>}
 
                     {metrics && metrics.length > 0 ? (
                         <div className="space-y-3">
                             <div className="overflow-x-auto">
-                                {/* ... (Metrics Table Head and Body remains the same) ... */}
                                 <table className="min-w-full divide-y divide-gray-200">
                                     <thead className="bg-gray-50">
                                     <tr>
