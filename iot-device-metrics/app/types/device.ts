@@ -2,6 +2,7 @@
     id: string;
     name: string;
     description: string;
+    locationName: string;
     isActive: boolean;
 };
 

@@ -7,7 +7,7 @@ import { RegisterFormData } from '../types/auth';
 import Link from 'next/link';
 
 
-const EXTERNAL_REGISTER_API = ' http://localhost:3000/api/users';
+const EXTERNAL_REGISTER_API = 'http://51.103.231.79:3000/api/users';
 
 const SignUpForm: React.FC = () => {
     const router = useRouter();
@@ -78,7 +78,6 @@ const SignUpForm: React.FC = () => {
 
             <div style={{ marginTop: '20px', textAlign: 'center' }}>
                 <p style={{marginBottom: '10px'}}>Already have an account?</p>
-                {/* Use the Next.js Link component for client-side routing */}
                 <Link href="/log-in" passHref style={{
                     display: 'block',
                     padding: '10px',

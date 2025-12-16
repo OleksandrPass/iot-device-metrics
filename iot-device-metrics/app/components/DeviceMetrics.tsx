@@ -3,11 +3,12 @@
 'use client';
 
 import React from 'react';
-import { Device, Metric } from '../types/device'; // Adjust path as needed
+import { Device, Metric } from '../types/device'; // Ensure correct path
 
 interface DeviceMetricsProps {
     devices: Device[];
     selectedDeviceId: string | null;
+    selectedDevice: Device | undefined;
     metrics: Metric[] | null;
     loading: boolean;
     handleDeviceSelect: (e: React.ChangeEvent<HTMLSelectElement>) => void;
@@ -18,6 +19,7 @@ interface DeviceMetricsProps {
 const DeviceMetrics: React.FC<DeviceMetricsProps> = ({
                                                          devices,
                                                          selectedDeviceId,
+                                                         selectedDevice, // Destructure the new prop
                                                          metrics,
                                                          loading,
                                                          handleDeviceSelect,
@@ -52,13 +54,23 @@ const DeviceMetrics: React.FC<DeviceMetricsProps> = ({
             {/* Metrics Display Panel */}
             {selectedDeviceId && (
                 <div className="mt-8 p-6 border rounded-lg shadow-md">
-                    <h2 className="text-xl font-bold mb-4">Metrics for Device: {selectedDeviceId}</h2>
+                    <h2 className="text-xl font-bold mb-4">Metrics for Device: {selectedDevice?.name || selectedDeviceId}</h2>
+
+                    {/* NEW: Display Description and Location */}
+                    {selectedDevice && (
+                        <div className="mb-4 p-3 bg-white border rounded-md text-sm space-y-1">
+                            <p><strong>Location:</strong> {selectedDevice.locationName || 'N/A'}</p>
+                            <p><strong>Description:</strong> {selectedDevice.description || 'No description provided.'}</p>
+                        </div>
+                    )}
+                    {/* END NEW */}
 
                     {(loading && !initialMetricsLoaded.current) && <p>Fetching initial metrics...</p>}
 
                     {metrics && metrics.length > 0 ? (
                         <div className="space-y-3">
                             <div className="overflow-x-auto">
+                                {/* ... (Metrics Table Head and Body remains the same) ... */}
                                 <table className="min-w-full divide-y divide-gray-200">
                                     <thead className="bg-gray-50">
                                     <tr>

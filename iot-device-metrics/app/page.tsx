@@ -6,8 +6,8 @@ export default function MainPage() {
 
     return(
         <div>
-            <h1>IoT Device Dashboard</h1>
-            <button> <Link href="/sign-up">Sign Up</Link> </button>
+            <h1 className={'text-gray-800 text-center p-8 text-2xl'}>IoT Device Dashboard</h1>
+            <button className={`bg-white hover:bg-gray-100`}> <Link href="/sign-up">Sign Up</Link> </button>
 
         </div>
     )
