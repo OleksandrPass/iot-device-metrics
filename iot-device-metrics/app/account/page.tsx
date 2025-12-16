@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation';
 import React, { useEffect, useState, useCallback } from 'react';
 
 const USER_PROFILE_API_URL = 'http://51.103.231.79:3000/api/users/patch';
-const DELETE_USER_API_URL = 'http://51.103.231.79:3000/api/users/';
+const DELETE_USER_API_URL = 'http://51.103.231.79:3000/api/users';
 
 interface UserProfile {
     id: string;
@@ -68,6 +68,8 @@ const AccountPage: React.FC = () => {
             username: newUsername,
         };
 
+        const user = userProfile;
+
         if (!newEmail.trim() || !newUsername.trim()) {
             setUpdateError("Email and Username cannot be empty.");
             setIsUpdating(false);
@@ -117,8 +119,10 @@ const AccountPage: React.FC = () => {
         setIsDeleting(true);
         setError(null);
 
+        const userdel = localStorage.getItem('userId');
+
         try {
-            const response = await fetch(DELETE_USER_API_URL, {
+            const response = await fetch(`${DELETE_USER_API_URL}/${userdel}`, {
                 method: 'DELETE',
                 headers: {
                     'Authorization': `Bearer ${token}`,
