@@ -15,7 +15,6 @@ const DEVICE_BASE_API_URL = 'http://51.103.231.79:3000/api/devices';
 const DevicesPage: React.FC = () => {
     const router = useRouter();
 
-    // --- State ---
     const [authToken, setAuthToken] = useState<string | null>(null);
     const [devices, setDevices] = useState<Device[]>([]);
     const [selectedDeviceId, setSelectedDeviceId] = useState<string | null>(null);
@@ -29,7 +28,6 @@ const DevicesPage: React.FC = () => {
     const initialMetricsLoaded = useRef(false);
     const selectedDevice = devices.find(d => d.id === selectedDeviceId);
 
-    // --- Handlers ---
     const handleLogout = useCallback(() => {
         localStorage.removeItem('authToken');
         localStorage.removeItem('userId');
@@ -99,7 +97,6 @@ const DevicesPage: React.FC = () => {
 
             const updatedDeviceFromServer: Device = await response.json();
 
-            // Sync state with server response
             setDevices(prev => prev.map(d => d.id === deviceId ? updatedDeviceFromServer : d));
             return true;
         } catch (err) {
@@ -108,20 +105,21 @@ const DevicesPage: React.FC = () => {
         }
     }, [authToken]);
 
-    // --- Effects ---
-
-    // Auth Check
     useEffect(() => {
         const token = localStorage.getItem('authToken');
         if (!token) {
+            setAuthToken(null);
+            setDevices([]);
+            setSelectedDeviceId(null);
             router.push('/log-in');
-        } else {
+        } else if (token !== authToken){
+            setDevices([]);
+            setSelectedDeviceId(null);
             setAuthToken(token);
-            setLoading(false);
+            setLoading(true);
         }
-    }, [router]);
+    }, [router, authToken]);
 
-    // Fetch Devices
     const fetchDevices = useCallback(async (token: string) => {
         setLoading(true);
         setError(null);
@@ -140,13 +138,14 @@ const DevicesPage: React.FC = () => {
 
             const data: Device[] = await response.json();
             setDevices(data);
+
             if (data.length > 0 && !selectedDeviceId) setSelectedDeviceId(data[0].id);
         } catch (err) {
             setError(`Device List Error: ${(err as Error).message}`);
         } finally {
             setLoading(false);
         }
-    }, [router, handleLogout, selectedDeviceId]);
+    }, [handleLogout]);
 
     useEffect(() => {
         if (authToken) fetchDevices(authToken);
@@ -190,7 +189,6 @@ const DevicesPage: React.FC = () => {
 
     return (
         <div className="p-8 space-y-8 bg-gray-50 min-h-screen">
-            {/* Header Section */}
             <div className="flex justify-between items-center mb-6">
                 <h1 className="text-3xl font-extrabold text-gray-900">IoT Device Dashboard</h1>
                 <div className="flex space-x-4">
@@ -227,17 +225,14 @@ const DevicesPage: React.FC = () => {
                 </div>
             </div>
 
-            {/* Error Message */}
             {error && (
                 <div className="p-4 text-red-700 border border-red-200 bg-red-50 rounded-lg">
                     <strong>Error:</strong> {error}
                 </div>
             )}
 
-            {/* Loading Indicator */}
             {loading && !devices.length && <div className="text-center py-10 text-gray-500">Initializing...</div>}
 
-            {/* Device Creation Modal */}
             {showCreateForm && authToken && (
                 <DeviceCreateForm
                     token={authToken}
@@ -246,7 +241,6 @@ const DevicesPage: React.FC = () => {
                 />
             )}
 
-            {/* Device Edit Modal */}
             {editingDevice && authToken && (
                 <DevicePatchForm
                     device={editingDevice}
@@ -256,7 +250,6 @@ const DevicesPage: React.FC = () => {
                 />
             )}
 
-            {/* Metrics Display */}
             <DeviceMetrics
                 devices={devices}
                 selectedDeviceId={selectedDeviceId}
