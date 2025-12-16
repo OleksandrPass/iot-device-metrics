@@ -1,11 +1,8 @@
-﻿// app/account/page.tsx
-
-'use client';
+﻿'use client';
 
 import { useRouter } from 'next/navigation';
 import React, { useEffect, useState, useCallback } from 'react';
 
-// NOTE: Define your API endpoints here
 const USER_PROFILE_API_URL = 'http://51.103.231.79:3000/api/users/patch';
 const DELETE_USER_API_URL = 'http://51.103.231.79:3000/api/users/';
 
@@ -13,7 +10,6 @@ interface UserProfile {
     id: string;
     email: string;
     username?: string;
-    // Add other fields your API returns
 }
 
 const AccountPage: React.FC = () => {
@@ -22,17 +18,14 @@ const AccountPage: React.FC = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
-    // State for update form
     const [newEmail, setNewEmail] = useState('');
     const [newUsername, setNewUsername] = useState('');
     const [isUpdating, setIsUpdating] = useState(false);
     const [updateError, setUpdateError] = useState<string | null>(null);
 
-    // State for deletion confirmation
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
 
-    // --- Logout Function (For safety and cleanup) ---
     const handleLogout = useCallback(() => {
         localStorage.removeItem('authToken');
         localStorage.removeItem('userId');
@@ -40,7 +33,6 @@ const AccountPage: React.FC = () => {
         router.push('/log-in');
     }, [router]);
 
-    // --- Profile Fetching ---
     useEffect(() => {
         const token = localStorage.getItem('authToken');
         const userId = localStorage.getItem('userId');
@@ -51,7 +43,6 @@ const AccountPage: React.FC = () => {
             return;
         }
 
-        // --- Simulate Data Load & Set Initial Form State ---
         const profile: UserProfile = {
             id: userId,
             email: userEmail,
@@ -61,7 +52,6 @@ const AccountPage: React.FC = () => {
         setNewEmail(profile.email);
         setNewUsername(profile.username);
         setLoading(false);
-        // --- End Simulation ---
 
     }, [router]);
 
