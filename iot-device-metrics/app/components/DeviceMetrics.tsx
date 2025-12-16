@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { Device, Metric } from '../types/device';
 
+
 interface DeviceMetricsProps {
     devices: Device[];
     selectedDeviceId: string | null;
@@ -10,7 +11,8 @@ interface DeviceMetricsProps {
     metrics: Metric[] | null;
     loading: boolean;
     handleDeviceSelect: (e: React.ChangeEvent<HTMLSelectElement>) => void;
-    handleDeleteDevice: (deviceId: string) => void; // Added for deletion
+    handleDeleteDevice: (deviceId: string) => Promise<void>;
+    onEditClick: (device: Device) => void; // <--- THIS MAKES THE ERROR GO AWAY
     initialMetricsLoaded: React.MutableRefObject<boolean>;
     pollingInterval: number;
     showCreateForm: boolean;
@@ -24,6 +26,7 @@ const DeviceMetrics: React.FC<DeviceMetricsProps> = ({
                                                          loading,
                                                          handleDeviceSelect,
                                                          handleDeleteDevice,
+                                                         onEditClick,
                                                          initialMetricsLoaded,
                                                          pollingInterval,
                                                          showCreateForm,
@@ -84,6 +87,8 @@ const DeviceMetrics: React.FC<DeviceMetricsProps> = ({
                         </option>
                     ))}
                 </select>
+
+
 
                 {selectedDeviceId && (
                     <button

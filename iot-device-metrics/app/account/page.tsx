@@ -192,7 +192,7 @@ const AccountPage: React.FC = () => {
                 <h1 className="text-3xl font-bold">👤 My Account</h1>
                 <button
                     onClick={() => router.push('/devices')}
-                    className="px-4 py-2 bg-blue-600 text-white font-semibold rounded-md shadow hover:bg-blue-700 transition"
+                    className="px-4 py-2 bg-gray-500 text-white font-semibold rounded-md shadow hover:bg-gray-700 transition"
                 >
                     &larr; Back to Dashboard
                 </button>
@@ -262,7 +262,7 @@ const AccountPage: React.FC = () => {
                     onClick={handleLogout}
                     className="px-6 py-2 border border-gray-500 text-gray-700 font-semibold rounded-md shadow hover:bg-gray-100 transition"
                 >
-                    Log Out of Session
+                    Log Out
                 </button>
             </div>
         </div>
