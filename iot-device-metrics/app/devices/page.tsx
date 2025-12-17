@@ -257,7 +257,7 @@ const DevicesPage: React.FC = () => {
                 )}
 
                 {showAlertForm && selectedDeviceId && authToken && (
-                    <div className="w-1/2 mx-auto space-y-8 mb-5">
+                    <div className=" mx-auto space-y-8 mb-5">
 
                         <div>
                             <AlertRuleForm
@@ -267,16 +267,17 @@ const DevicesPage: React.FC = () => {
                             />
                         </div>
 
-                        <div className=" border-gray-200 pt-6">
-                            <AlertRulesList
-                                deviceId={selectedDeviceId}
-                                token={authToken}
-                            />
-                        </div>
+
                     </div>
                 )}
-
-
+                {showAlertForm && selectedDeviceId && authToken && (
+                <div className=" border-gray-200 pt-6">
+                    <AlertRulesList
+                        deviceId={selectedDeviceId}
+                        token={authToken}
+                    />
+                </div>
+                )}
             </div>
 
             <DeviceMetrics
