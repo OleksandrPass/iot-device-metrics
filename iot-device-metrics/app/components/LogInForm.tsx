@@ -50,31 +50,29 @@ const LoginForm: React.FC = () => {
 
     return (
         <form onSubmit={handleSubmit(onSubmit)}>
-            <div>
-                <label htmlFor="email">Email</label>
-                <input id="email" type="email" {...register('email', { required: true })} />
+            <div className="flex flex-col mb-4">
+                <label htmlFor="email" className={"block mb-2.5 text-m font-medium text-heading"}>Email</label>
+                <input id="email" type="email" {...register('email')} className= " rounded-lg bg-neutral-secondary-medium border border-default-medium text-heading text-m rounded-base focus:ring-brand focus:border-brand block w-full px-3 py-2.5  placeholder:text-body" placeholder="name@example.com" required/>
             </div>
-            <div>
-                <label htmlFor="password">Password</label>
-                <input id="password" type="password" {...register('password', { required: true })} />
+            <div className="flex flex-col mb-4">
+                <label htmlFor="password" className={"block mb-2.5 text-m font-medium text-heading"}>Password</label>
+                <input id="password" type="password" {...register('password')} className= " rounded-lg bg-neutral-secondary-medium border border-default-medium text-heading text-m rounded-base focus:ring-brand focus:border-brand block w-full px-3 py-2.5  placeholder:text-body"  required/>
             </div>
 
             {error && <p style={{color: 'red'}}>{error}</p>}
-            <button type="submit" disabled={isSubmitting}>
-                {isSubmitting ? 'Logging in...' : 'Log In'}
-            </button>
 
-            <div style={{ marginTop: '20px', textAlign: 'center' }}>
-                <p style={{marginBottom: '10px'}}>Don't have an account?</p>
-                <Link href="/sign-up" passHref style={{
-                    display: 'block',
-                    padding: '10px',
-                    backgroundColor: '#ddd',
-                    color: '#333',
-                    textDecoration: 'none',
-                    borderRadius: '4px',
-                    border: '1px solid #ccc'
-                }}>
+
+
+
+            <div>
+
+                <button type="submit" disabled={isSubmitting} className="mt-10 mr-3 px-10 py-2 border border-gray-500 text-gray-700 font-semibold rounded-md
+            shadow hover:bg-gray-200 transition">
+                    {isSubmitting ? 'Logging in...' : 'Log In'}
+                </button>
+
+                <Link href="/sign-up" className="mt-10 mr-3 px-10 py-2 border border-gray-500 text-gray-700 font-semibold rounded-md
+            shadow hover:bg-gray-200 transition">
                     Go to Sign Up
                 </Link>
             </div>

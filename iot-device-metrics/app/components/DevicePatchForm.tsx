@@ -3,18 +3,21 @@
 import React, { useState } from 'react';
 import { Device } from '../types/device';
 
-const CREATE_DEVICE_API_URL = 'http://51.103.231.79:3000/api/devices';
-
-interface DeviceCreateFormProps {
+interface DevicePatchFormProps {
+    device: Device;
     token: string;
     onClose: () => void;
-    onDeviceCreated: (newDevice: Device) => void;
+    onDevicePatched: (
+        deviceId: string,
+        updatedFields: { name?: string; description?: string; locationName?: string }
+    ) => Promise<boolean>;
 }
 
-const DeviceCreateForm: React.FC<DeviceCreateFormProps> = ({ token, onClose, onDeviceCreated }) => {
-    const [name, setName] = useState('');
-    const [description, setDescription] = useState('');
-    const [locationName, setLocationName] = useState('');
+const DevicePatchForm: React.FC<DevicePatchFormProps> = ({ device, onClose, onDevicePatched }) => {
+    const [name, setName] = useState(device.name);
+    const [description, setDescription] = useState(device.description || '');
+    const [locationName, setLocationName] = useState(device.locationName || '');
+
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [formError, setFormError] = useState<string | null>(null);
 
@@ -24,75 +27,78 @@ const DeviceCreateForm: React.FC<DeviceCreateFormProps> = ({ token, onClose, onD
         setFormError(null);
 
         if (!name.trim() || !description.trim() || !locationName.trim()) {
-            setFormError("Device name, description, and location are required.");
+            setFormError("All fields are required.");
+            setIsSubmitting(false);
+            return;
+        }
+
+        const patchPayload: any = {};
+        if (name !== device.name) patchPayload.name = name;
+        if (description !== device.description) patchPayload.description = description;
+        if (locationName !== device.locationName) patchPayload.locationName = locationName;
+
+        if (Object.keys(patchPayload).length === 0) {
+            setFormError("No changes detected.");
             setIsSubmitting(false);
             return;
         }
 
         try {
-            const response = await fetch(CREATE_DEVICE_API_URL, {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ name, description, locationName }),
-            });
-
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.message || 'Failed to create device.');
+            const success = await onDevicePatched(device.id, patchPayload);
+            if (success) {
+                onClose();
+            } else {
+                setFormError("Server rejected the update. Please try again.");
             }
-
-            const newDevice: Device = await response.json();
-            onDeviceCreated(newDevice);
-            onClose();
-
         } catch (err) {
-            setFormError(`Creation Error: ${(err as Error).message}`);
+            setFormError(`Update Error: ${(err as Error).message}`);
         } finally {
             setIsSubmitting(false);
         }
     };
 
     return (
+        /* Replaced modal classes with the inline container styles from Create Form */
         <div className="p-6 border border-gray-400 bg-gray-50 rounded-lg shadow-xl mb-8 w-3/12 mx-auto space-y-4">
-            <h3 className="text-lg font-bold mb-4 text-gray-800">Register New Device</h3>
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <h3 className="text-lg font-bold mb-4 text-gray-800">Edit Device Details</h3>
 
+            <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
-                    <label className="block text-sm font-medium text-gray-700" htmlFor="deviceName">Device Name</label>
+                    <label className="block text-sm font-medium text-gray-700" htmlFor="patchName">Device Name</label>
                     <input
-                        id="deviceName"
+                        id="patchName"
                         type="text"
                         value={name}
                         onChange={(e) => setName(e.target.value)}
                         className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
                         required
+                        disabled={isSubmitting}
                     />
                 </div>
 
                 <div>
-                    <label className="block text-sm font-medium text-gray-700" htmlFor="deviceDescription">Device Description</label>
+                    <label className="block text-sm font-medium text-gray-700" htmlFor="patchDescription">Device Description</label>
                     <textarea
-                        id="deviceDescription"
+                        id="patchDescription"
                         value={description}
                         onChange={(e) => setDescription(e.target.value)}
                         rows={3}
                         className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
                         required
+                        disabled={isSubmitting}
                     />
                 </div>
 
                 <div>
-                    <label className="block text-sm font-medium text-gray-700" htmlFor="locationName">Location Name</label>
+                    <label className="block text-sm font-medium text-gray-700" htmlFor="patchLocation">Location Name</label>
                     <input
-                        id="locationName"
+                        id="patchLocation"
                         type="text"
                         value={locationName}
                         onChange={(e) => setLocationName(e.target.value)}
                         className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
                         required
+                        disabled={isSubmitting}
                     />
                 </div>
 
@@ -109,10 +115,11 @@ const DeviceCreateForm: React.FC<DeviceCreateFormProps> = ({ token, onClose, onD
                     </button>
                     <button
                         type="submit"
-                        className="px-4 py-2 border rounded-md text-white bg-green-600 hover:bg-green-700 disabled:bg-gray-400"
+                        /* Matched background to indigo/blue to distinguish from "Green" create */
+                        className="px-4 py-2 border rounded-md text-white bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-400"
                         disabled={isSubmitting}
                     >
-                        {isSubmitting ? 'Creating...' : 'Create Device'}
+                        {isSubmitting ? 'Saving...' : 'Save Changes'}
                     </button>
                 </div>
             </form>
@@ -120,4 +127,4 @@ const DeviceCreateForm: React.FC<DeviceCreateFormProps> = ({ token, onClose, onD
     );
 };
 
-export default DeviceCreateForm;
+export default DevicePatchForm;

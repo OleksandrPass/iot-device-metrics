@@ -5,11 +5,13 @@ import { useRouter } from 'next/navigation';
 import { Device, Metric } from '../types/device';
 import DeviceCreateForm from '../components/DeviceCreation';
 import DeviceMetrics from '../components/DeviceMetrics';
+import DevicePatchForm from '../components/DevicePatchForm'; // Ensure this path matches your file name
 
 const POLLING_INTERVAL_MS = 5000;
 const DEVICES_API_URL = 'http://51.103.231.79:3000/api/devices/user-devices';
 const METRICS_BASE_API_URL = 'http://51.103.231.79:3000/api/measurements';
-const DELETE_DEVICE_BASE_API_URL = 'http://51.103.231.79:3000/api/devices';
+const DEVICE_BASE_API_URL = 'http://51.103.231.79:3000/api/devices';
+const DEVICE_PATCH_API_URL = 'http://51.103.231.79:3000/api/devices/patch';
 
 const DevicesPage: React.FC = () => {
     const router = useRouter();
@@ -22,27 +24,24 @@ const DevicesPage: React.FC = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [showCreateForm, setShowCreateForm] = useState(false);
+    const [editingDevice, setEditingDevice] = useState<Device | null>(null);
 
     const initialMetricsLoaded = useRef(false);
-
     const selectedDevice = devices.find(d => d.id === selectedDeviceId);
 
     const handleLogout = useCallback(() => {
         localStorage.removeItem('authToken');
         localStorage.removeItem('userId');
         localStorage.removeItem('userEmail');
-
         setAuthToken(null);
         setDevices([]);
         setSelectedDeviceId(null);
         setMetrics(null);
-
         router.push('/log-in');
     }, [router]);
 
     const handleDeviceSelect = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
-        const deviceId = e.target.value;
-        setSelectedDeviceId(deviceId);
+        setSelectedDeviceId(e.target.value);
     }, []);
 
     const handleNewDeviceCreated = useCallback((newDevice: Device) => {
@@ -53,13 +52,10 @@ const DevicesPage: React.FC = () => {
 
     const handleDeleteDevice = useCallback(async (deviceId: string) => {
         if (!authToken) return;
-
         setLoading(true);
         setError(null);
-
         try {
-            const url = `${DELETE_DEVICE_BASE_API_URL}/${deviceId}`;
-            const response = await fetch(url, {
+            const response = await fetch(`${DEVICE_BASE_API_URL}/${deviceId}`, {
                 method: 'DELETE',
                 headers: {
                     'Authorization': `Bearer ${authToken}`,
@@ -67,37 +63,63 @@ const DevicesPage: React.FC = () => {
                 },
             });
 
-            if (!response.ok) {
-                throw new Error(`Failed to delete device ${deviceId}.`);
-            }
+            if (!response.ok) throw new Error(`Failed to delete device ${deviceId}.`);
 
             setDevices(prevDevices => {
                 const updatedDevices = prevDevices.filter(d => d.id !== deviceId);
-
                 if (selectedDeviceId === deviceId) {
                     setSelectedDeviceId(updatedDevices.length > 0 ? updatedDevices[0].id : null);
                 }
                 return updatedDevices;
             });
-
-            setLoading(false);
-
         } catch (err) {
             setError(`Deletion Error: ${(err as Error).message}`);
+        } finally {
             setLoading(false);
         }
     }, [authToken, selectedDeviceId]);
 
+    const handleDevicePatched = useCallback(async (
+        deviceId: string,
+        updatedFields: { name?: string; description?: string; locationName?: string }
+    ) => {
+        if (!authToken) return false;
+        try {
+            const response = await fetch(`${DEVICE_PATCH_API_URL}/${deviceId}`, {
+                method: 'PATCH',
+                headers: {
+                    'Authorization': `Bearer ${authToken}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(updatedFields)
+            });
+
+            if (!response.ok) throw new Error("Failed to update device");
+
+            const updatedDeviceFromServer: Device = await response.json();
+
+            setDevices(prev => prev.map(d => d.id === deviceId ? updatedDeviceFromServer : d));
+            return true;
+        } catch (err) {
+            console.error("Update failed:", err);
+            return false;
+        }
+    }, [authToken]);
 
     useEffect(() => {
         const token = localStorage.getItem('authToken');
         if (!token) {
+            setAuthToken(null);
+            setDevices([]);
+            setSelectedDeviceId(null);
             router.push('/log-in');
-        } else {
+        } else if (token !== authToken){
+            setDevices([]);
+            setSelectedDeviceId(null);
             setAuthToken(token);
-            setLoading(false);
+            setLoading(true);
         }
-    }, [router]);
+    }, [router, authToken]);
 
     const fetchDevices = useCallback(async (token: string) => {
         setLoading(true);
@@ -109,112 +131,95 @@ const DevicesPage: React.FC = () => {
             });
 
             if (response.status === 401) {
-                localStorage.removeItem('authToken');
-                router.push('/log-in');
+                handleLogout();
                 return;
             }
 
-            if (!response.ok) {
-                throw new Error('Failed to fetch device list. API returned non-200 status.');
-            }
+            if (!response.ok) throw new Error('Failed to fetch device list.');
 
             const data: Device[] = await response.json();
             setDevices(data);
-            setLoading(false);
 
+            if (data.length > 0 && !selectedDeviceId) setSelectedDeviceId(data[0].id);
         } catch (err) {
             setError(`Device List Error: ${(err as Error).message}`);
+        } finally {
             setLoading(false);
         }
-    }, [router]);
+    }, [handleLogout]);
 
     useEffect(() => {
-        if (authToken) {
-            fetchDevices(authToken);
-        }
+        if (authToken) fetchDevices(authToken);
     }, [authToken, fetchDevices]);
 
+    // Fetch Metrics
     const fetchMetrics = useCallback(async (deviceId: string, token: string) => {
         if (!initialMetricsLoaded.current) {
             setMetrics(null);
             setLoading(true);
-            setError(null);
         }
-
         try {
-            const url = `${METRICS_BASE_API_URL}/${deviceId}`;
-            const response = await fetch(url, {
+            const response = await fetch(`${METRICS_BASE_API_URL}/${deviceId}`, {
                 method: 'GET',
                 headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
             });
-
-            if (!response.ok) {
-                throw new Error(`Failed to fetch metrics for device ${deviceId}.`);
-            }
-
+            if (!response.ok) throw new Error(`Failed to fetch metrics.`);
             const data: Metric[] = await response.json();
+            console.log("Metrics:", data);
             setMetrics(data);
-
             if (!initialMetricsLoaded.current) {
                 setLoading(false);
                 initialMetricsLoaded.current = true;
             }
-
         } catch (err) {
-            if (!initialMetricsLoaded.current) {
-                setError(`Metrics Error: ${(err as Error).message}`);
-                setLoading(false);
-            }
-            console.error("Polling failed:", err);
+            console.error("Metrics Polling failed:", err);
         }
     }, []);
 
     useEffect(() => {
         let intervalId: NodeJS.Timeout | null = null;
-
         if (selectedDeviceId && authToken) {
             initialMetricsLoaded.current = false;
             fetchMetrics(selectedDeviceId, authToken);
-
-            intervalId = setInterval(() => {
-                fetchMetrics(selectedDeviceId, authToken);
-            }, POLLING_INTERVAL_MS);
+            intervalId = setInterval(() => fetchMetrics(selectedDeviceId, authToken), POLLING_INTERVAL_MS);
         }
-
         return () => {
-            if (intervalId) {
-                clearInterval(intervalId);
-            }
+            if (intervalId) clearInterval(intervalId);
             initialMetricsLoaded.current = false;
         };
     }, [selectedDeviceId, authToken, fetchMetrics]);
 
-
     return (
-        <div className="p-8 space-y-8">
+        <div className="p-8 space-y-8 bg-gray-50 min-h-screen">
             <div className="flex justify-between items-center mb-6">
-                <h1 className="text-3xl font-bold">IoT Device Dashboard</h1>
-
+                <h1 className="text-3xl font-extrabold text-gray-900">IoT Device Dashboard</h1>
                 <div className="flex space-x-4">
-
                     <button
                         onClick={() => router.push('/account')}
-                        className="px-6 py-2 bg-gray-200 text-gray-800 font-semibold rounded-md shadow hover:bg-gray-300 transition"
-                        disabled={!authToken || loading || showCreateForm}
+                        className="px-6 py-2 bg-white border border-gray-300 text-gray-700 font-semibold rounded-md shadow-sm hover:bg-gray-50 transition"
+                        disabled={!authToken || loading}
                     >
                         My Account
                     </button>
                     <button
                         onClick={() => setShowCreateForm(true)}
-                        className="px-6 py-2 bg-green-600 text-white font-semibold rounded-md shadow hover:bg-green-700 transition"
-                        disabled={!authToken || loading || showCreateForm}
+                        className="px-6 py-2 bg-indigo-600 text-white font-semibold rounded-md shadow-sm hover:bg-indigo-700 transition"
+                        disabled={!authToken || loading}
                     >
-                        + Create New Device
+                        + Create Device
+                    </button>
+
+                    <button
+                        onClick={() => selectedDevice && setEditingDevice(selectedDevice)}
+                        className="px-6 py-2 bg-yellow-500 text-white font-semibold rounded-md shadow-sm hover:bg-yellow-600 transition"
+                        disabled={!selectedDevice || loading}
+                    >
+                        Edit Details
                     </button>
 
                     <button
                         onClick={handleLogout}
-                        className="px-6 py-2 border border-red-500 text-red-600 font-semibold rounded-md shadow hover:bg-red-50 transition"
+                        className="px-6 py-2 border border-red-200 text-red-600 font-semibold rounded-md shadow-sm hover:bg-red-50 transition"
                         disabled={!authToken}
                     >
                         Log Out
@@ -222,16 +227,32 @@ const DevicesPage: React.FC = () => {
                 </div>
             </div>
 
-            {showCreateForm && authToken && (
-                <DeviceCreateForm
-                    token={authToken}
-                    onClose={() => setShowCreateForm(false)}
-                    onDeviceCreated={handleNewDeviceCreated}
-                />
+            {error && (
+                <div className="p-4 text-red-700 border border-red-200 bg-red-50 rounded-lg">
+                    <strong>Error:</strong> {error}
+                </div>
             )}
 
-            {(loading && !devices.length && !showCreateForm) && <div className="p-4">Loading devices...</div>}
-            {error && <div className="p-4 text-red-500 border border-red-500 bg-red-50 rounded">Error: {error}</div>}
+            {loading && !devices.length && <div className="text-center py-10 text-gray-500">Initializing...</div>}
+            <div className="flex justify-center space-x-4 mb-4">
+
+                {showCreateForm && authToken && (
+                    <DeviceCreateForm
+                        token={authToken}
+                        onClose={() => setShowCreateForm(false)}
+                        onDeviceCreated={handleNewDeviceCreated}
+                    />
+                )}
+
+                {editingDevice && authToken && (
+                    <DevicePatchForm
+                        device={editingDevice}
+                        token={authToken}
+                        onClose={() => setEditingDevice(null)}
+                        onDevicePatched={handleDevicePatched}
+                    />
+                )}
+            </div>
 
             <DeviceMetrics
                 devices={devices}
@@ -241,6 +262,7 @@ const DevicesPage: React.FC = () => {
                 loading={loading}
                 handleDeviceSelect={handleDeviceSelect}
                 handleDeleteDevice={handleDeleteDevice}
+                onEditClick={(device: Device) => setEditingDevice(device)} // Pass the edit handler
                 initialMetricsLoaded={initialMetricsLoaded}
                 pollingInterval={POLLING_INTERVAL_MS}
                 showCreateForm={showCreateForm}
