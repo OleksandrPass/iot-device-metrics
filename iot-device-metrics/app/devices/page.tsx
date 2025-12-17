@@ -7,6 +7,8 @@ import DeviceCreateForm from '../components/DeviceCreation';
 import DeviceMetrics from '../components/DeviceMetrics';
 import DevicePatchForm from '../components/DevicePatchForm';
 import DeviceAlerts from "@/app/components/DeviceAlerts";
+import AlertRuleForm from "@/app/components/DeviceAlertsForm";
+import AlertRulesList from "@/app/components/AlertRulesList";
 
 const POLLING_INTERVAL_MS = 5000;
 const DEVICES_API_URL = 'http://51.103.231.79:3000/api/devices/user-devices';
@@ -25,6 +27,7 @@ const DevicesPage: React.FC = () => {
     const [error, setError] = useState<string | null>(null);
     const [showCreateForm, setShowCreateForm] = useState(false);
     const [editingDevice, setEditingDevice] = useState<Device | null>(null);
+    const [showAlertForm, setShowAlertForm] = useState(false);
 
     const initialMetricsLoaded = useRef(false);
     const selectedDevice = devices.find(d => d.id === selectedDeviceId);
@@ -164,7 +167,6 @@ const DevicesPage: React.FC = () => {
             });
             if (!response.ok) throw new Error(`Failed to fetch metrics.`);
             const data: Metric[] = await response.json();
-            console.log("Metrics:", data);
             setMetrics(data);
             if (!initialMetricsLoaded.current) {
                 setLoading(false);
@@ -209,6 +211,14 @@ const DevicesPage: React.FC = () => {
                         + Create Device
                     </button>
 
+                    <button
+                        onClick={() => setShowAlertForm(true)}
+                        className="px-6 py-2 bg-orange-500 text-white font-semibold rounded-md shadow-sm hover:bg-orange-600 transition"
+                        disabled={!selectedDeviceId || loading}
+                    >
+                        Add Alert Rule
+                    </button>
+
 
                     <button
                         onClick={handleLogout}
@@ -245,6 +255,28 @@ const DevicesPage: React.FC = () => {
                         onDevicePatched={handleDevicePatched}
                     />
                 )}
+
+                {showAlertForm && selectedDeviceId && authToken && (
+                    <div className="w-1/2 mx-auto space-y-8 mb-5">
+
+                        <div>
+                            <AlertRuleForm
+                                deviceId={selectedDeviceId}
+                                token={authToken}
+                                onClose={() => setShowAlertForm(false)}
+                            />
+                        </div>
+
+                        <div className=" border-gray-200 pt-6">
+                            <AlertRulesList
+                                deviceId={selectedDeviceId}
+                                token={authToken}
+                            />
+                        </div>
+                    </div>
+                )}
+
+
             </div>
 
             <DeviceMetrics
@@ -255,7 +287,7 @@ const DevicesPage: React.FC = () => {
                 loading={loading}
                 handleDeviceSelect={handleDeviceSelect}
                 handleDeleteDevice={handleDeleteDevice}
-                onEditClick={(device: Device) => setEditingDevice(device)} // Pass the edit handler
+                onEditClick={(device: Device) => setEditingDevice(device)}
                 initialMetricsLoaded={initialMetricsLoaded}
                 pollingInterval={POLLING_INTERVAL_MS}
                 showCreateForm={showCreateForm}
@@ -269,6 +301,9 @@ const DevicesPage: React.FC = () => {
                     />
                 </div>
             )}
+
+
+
         </div>
     );
 };

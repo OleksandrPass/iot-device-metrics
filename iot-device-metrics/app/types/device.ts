@@ -32,3 +32,15 @@ export interface Alert {
         isActive: boolean;
     };
 }
+
+export interface AlertRule {
+    id: string;
+    userId: string;
+    deviceId: string;
+    name: string;
+    pm2_5Threshold: number;
+    pm10Threshold: number;
+    co2Threshold: number;
+    aqiThreshold: number;
+    isActive: boolean;
+}
