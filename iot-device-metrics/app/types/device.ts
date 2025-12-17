@@ -19,3 +19,16 @@ export type Metric = {
     healthMessage: string;
 };
 
+export interface Alert {
+    id: string;
+    deviceId: string;
+    alertRuleId: string;
+    message: string;
+    isRead: boolean;
+    triggeredAt: string;
+    alertRule: {
+        id: string;
+        name: string;
+        isActive: boolean;
+    };
+}
