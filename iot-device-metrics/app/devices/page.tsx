@@ -11,6 +11,7 @@ const POLLING_INTERVAL_MS = 5000;
 const DEVICES_API_URL = 'http://51.103.231.79:3000/api/devices/user-devices';
 const METRICS_BASE_API_URL = 'http://51.103.231.79:3000/api/measurements';
 const DEVICE_BASE_API_URL = 'http://51.103.231.79:3000/api/devices';
+const DEVICE_PATCH_API_URL = 'http://51.103.231.79:3000/api/devices/patch';
 
 const DevicesPage: React.FC = () => {
     const router = useRouter();
@@ -84,7 +85,7 @@ const DevicesPage: React.FC = () => {
     ) => {
         if (!authToken) return false;
         try {
-            const response = await fetch(`${DEVICE_BASE_API_URL}/${deviceId}`, {
+            const response = await fetch(`${DEVICE_PATCH_API_URL}/${deviceId}`, {
                 method: 'PATCH',
                 headers: {
                     'Authorization': `Bearer ${authToken}`,
@@ -164,6 +165,7 @@ const DevicesPage: React.FC = () => {
             });
             if (!response.ok) throw new Error(`Failed to fetch metrics.`);
             const data: Metric[] = await response.json();
+            console.log("Metrics:", data);
             setMetrics(data);
             if (!initialMetricsLoaded.current) {
                 setLoading(false);
@@ -232,23 +234,25 @@ const DevicesPage: React.FC = () => {
             )}
 
             {loading && !devices.length && <div className="text-center py-10 text-gray-500">Initializing...</div>}
+            <div className="flex justify-center space-x-4 mb-4">
 
-            {showCreateForm && authToken && (
-                <DeviceCreateForm
-                    token={authToken}
-                    onClose={() => setShowCreateForm(false)}
-                    onDeviceCreated={handleNewDeviceCreated}
-                />
-            )}
+                {showCreateForm && authToken && (
+                    <DeviceCreateForm
+                        token={authToken}
+                        onClose={() => setShowCreateForm(false)}
+                        onDeviceCreated={handleNewDeviceCreated}
+                    />
+                )}
 
-            {editingDevice && authToken && (
-                <DevicePatchForm
-                    device={editingDevice}
-                    token={authToken}
-                    onClose={() => setEditingDevice(null)}
-                    onDevicePatched={handleDevicePatched}
-                />
-            )}
+                {editingDevice && authToken && (
+                    <DevicePatchForm
+                        device={editingDevice}
+                        token={authToken}
+                        onClose={() => setEditingDevice(null)}
+                        onDevicePatched={handleDevicePatched}
+                    />
+                )}
+            </div>
 
             <DeviceMetrics
                 devices={devices}

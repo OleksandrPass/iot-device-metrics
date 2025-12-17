@@ -12,7 +12,7 @@ interface DeviceMetricsProps {
     loading: boolean;
     handleDeviceSelect: (e: React.ChangeEvent<HTMLSelectElement>) => void;
     handleDeleteDevice: (deviceId: string) => Promise<void>;
-    onEditClick: (device: Device) => void; // <--- THIS MAKES THE ERROR GO AWAY
+    onEditClick: (device: Device) => void;
     initialMetricsLoaded: React.MutableRefObject<boolean>;
     pollingInterval: number;
     showCreateForm: boolean;
