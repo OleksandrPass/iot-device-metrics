@@ -8,7 +8,7 @@ interface DeviceAlertsProps {
     token: string;
 }
 
-const ALERTS_API_URL = 'https://vdds-iot.duckdns.org/api/alerts';
+const ALERTS_API_URL = 'https://vdds-iot.duckdns.org/api/alerts/device';
 
 const DeviceAlerts: React.FC<DeviceAlertsProps> = ({ deviceId, token }) => {
     const [alerts, setAlerts] = useState<Alert[]>([]);
@@ -18,13 +18,15 @@ const DeviceAlerts: React.FC<DeviceAlertsProps> = ({ deviceId, token }) => {
         if (!deviceId || !token) return;
 
         try {
-            const response = await fetch(`${ALERTS_API_URL}`, {
+            const response = await fetch(`${ALERTS_API_URL}/${deviceId}`, {
                 headers: {
                     'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json'
                 },
             });
+
             if (!response.ok) throw new Error('Failed to fetch alerts');
+
             const data = await response.json();
             setAlerts(data);
         } catch (err) {
@@ -35,18 +37,23 @@ const DeviceAlerts: React.FC<DeviceAlertsProps> = ({ deviceId, token }) => {
     }, [deviceId, token]);
 
     useEffect(() => {
+        setAlerts([]);
         setLoading(true);
+
         fetchAlerts();
+
         const interval = setInterval(fetchAlerts, 5000);
         return () => clearInterval(interval);
     }, [fetchAlerts]);
 
-    if (loading && !alerts.length) return <div className="text-sm text-gray-500">Loading alerts...</div>;
+    if (loading && !alerts.length) {
+        return <div className="text-sm text-gray-500 mt-10">Loading alerts for device...</div>;
+    }
 
     return (
         <div className="mt-10">
             <h2 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
-                Device Alerts
+                <span className="text-red-500">🔔</span> Recent Device Alerts
             </h2>
 
             <div className="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
@@ -61,7 +68,7 @@ const DeviceAlerts: React.FC<DeviceAlertsProps> = ({ deviceId, token }) => {
                     </thead>
                     <tbody className="divide-y divide-gray-200">
                     {alerts.length > 0 ? (
-                        alerts.slice(0,5).map((alert) => (
+                        alerts.slice(0, 5).map((alert) => (
                             <tr key={alert.id} className={alert.isRead ? 'opacity-60' : 'bg-white'}>
                                 <td className="px-4 py-3 text-sm font-medium text-gray-900">
                                     {alert.alertRule.name}
@@ -74,7 +81,7 @@ const DeviceAlerts: React.FC<DeviceAlertsProps> = ({ deviceId, token }) => {
                                 </td>
                                 <td className="px-4 py-3">
                                         <span className={`text-[10px] px-2 py-0.5 rounded-full uppercase font-bold ${
-                                            alert.isRead ? 'bg-gray-200 text-gray-500' : 'bg-red-200 text-red-700'
+                                            alert.isRead ? 'bg-gray-200 text-gray-500' : 'bg-red-100 text-red-700 border border-red-200'
                                         }`}>
                                             {alert.isRead ? 'Read' : 'New'}
                                         </span>
@@ -83,8 +90,8 @@ const DeviceAlerts: React.FC<DeviceAlertsProps> = ({ deviceId, token }) => {
                         ))
                     ) : (
                         <tr>
-                            <td colSpan={4} className="px-4 py-8 text-center text-sm text-gray-500">
-                                No alerts found for this device.
+                            <td colSpan={4} className="px-4 py-8 text-center text-sm text-gray-500 italic">
+                                No alerts triggered for this device.
                             </td>
                         </tr>
                     )}
