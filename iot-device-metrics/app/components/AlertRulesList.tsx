@@ -8,19 +8,33 @@ interface AlertRulesListProps {
     token: string;
 }
 
+const BASE_URL = 'https://vdds-iot.duckdns.org/api/alert-rules';
+
 const AlertRulesList: React.FC<AlertRulesListProps> = ({ deviceId, token }) => {
     const [rules, setRules] = useState<AlertRule[]>([]);
     const [loading, setLoading] = useState(true);
     const [deletingId, setDeletingId] = useState<string | null>(null);
 
     const fetchRules = useCallback(async () => {
+        const storedUserId = localStorage.getItem('userId');
+
+        if (!storedUserId) {
+            console.error("No userId found in storage");
+            setLoading(false);
+            return;
+        }
+
         try {
-            const response = await fetch(`https://vdds-iot.duckdns.org/api/alert-rules`, {
+            const response = await fetch(`${BASE_URL}/${storedUserId}`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
+
             if (!response.ok) throw new Error('Failed to fetch rules');
-            const data = await response.json();
-            setRules(data);
+
+            const data: AlertRule[] = await response.json();
+
+            const deviceSpecificRules = data.filter(rule => rule.deviceId === deviceId);
+            setRules(deviceSpecificRules);
         } catch (err) {
             console.error(err);
         } finally {
@@ -40,7 +54,6 @@ const AlertRulesList: React.FC<AlertRulesListProps> = ({ deviceId, token }) => {
 
             if (!response.ok) throw new Error('Failed to delete rule');
 
-            // Remove from local state
             setRules(prev => prev.filter(r => r.id !== ruleId));
         } catch (err) {
             alert("Error deleting rule: " + (err as Error).message);
@@ -58,7 +71,7 @@ const AlertRulesList: React.FC<AlertRulesListProps> = ({ deviceId, token }) => {
     return (
         <div className="w-full">
             <h3 className="text-md font-bold text-gray-700 mb-3 flex items-center gap-2">
-                Active Threshold Rules
+                User-Defined Rules
             </h3>
             <div className="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
                 <table className="min-w-full divide-y divide-gray-200">
@@ -86,7 +99,6 @@ const AlertRulesList: React.FC<AlertRulesListProps> = ({ deviceId, token }) => {
                                         onClick={() => handleDeleteRule(rule.id)}
                                         disabled={deletingId === rule.id}
                                         className="text-red-500 hover:text-red-700 font-bold p-1 rounded hover:bg-red-50 disabled:opacity-50 transition"
-                                        title="Delete Rule"
                                     >
                                         {deletingId === rule.id ? '...' : '🗑️'}
                                     </button>
@@ -95,7 +107,7 @@ const AlertRulesList: React.FC<AlertRulesListProps> = ({ deviceId, token }) => {
                         ))
                     ) : (
                         <tr>
-                            <td colSpan={6} className="px-4 py-6 text-center text-gray-500 italic">No rules defined for this device.</td>
+                            <td colSpan={6} className="px-4 py-6 text-center text-gray-500 italic">No rules found for this device.</td>
                         </tr>
                     )}
                     </tbody>
