@@ -11,10 +11,10 @@ import AlertRuleForm from "@/app/components/DeviceAlertsForm";
 import AlertRulesList from "@/app/components/AlertRulesList";
 
 const POLLING_INTERVAL_MS = 5000;
-const DEVICES_API_URL = 'http://51.103.231.79:3000/api/devices/user-devices';
-const METRICS_BASE_API_URL = 'http://51.103.231.79:3000/api/measurements';
-const DEVICE_BASE_API_URL = 'http://51.103.231.79:3000/api/devices';
-const DEVICE_PATCH_API_URL = 'http://51.103.231.79:3000/api/devices/patch';
+const DEVICES_API_URL = 'https://vdds-iot.duckdns.org/api/devices/user-devices';
+const METRICS_BASE_API_URL = 'https://vdds-iot.duckdns.org/api/measurements';
+const DEVICE_BASE_API_URL = 'https://vdds-iot.duckdns.org/api/devices';
+const DEVICE_PATCH_API_URL = 'https://vdds-iot.duckdns.org/api/devices/patch';
 
 const DevicesPage: React.FC = () => {
     const router = useRouter();

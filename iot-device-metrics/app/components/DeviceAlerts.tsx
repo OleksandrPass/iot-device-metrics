@@ -8,7 +8,7 @@ interface DeviceAlertsProps {
     token: string;
 }
 
-const ALERTS_API_URL = 'http://51.103.231.79:3000/api/alerts';
+const ALERTS_API_URL = 'https://vdds-iot.duckdns.org/api/alerts';
 
 const DeviceAlerts: React.FC<DeviceAlertsProps> = ({ deviceId, token }) => {
     const [alerts, setAlerts] = useState<Alert[]>([]);

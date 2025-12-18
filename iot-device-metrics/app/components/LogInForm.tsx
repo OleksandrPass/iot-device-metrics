@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import { LoginFormData, UserResponse } from '../types/auth';
 import Link from "next/link";
 
-const EXTERNAL_LOGIN_API = 'http://51.103.231.79:3000/api/auth/login';
+const EXTERNAL_LOGIN_API = 'https://vdds-iot.duckdns.org/api/auth/login';
 
 const LoginForm: React.FC = () => {
     const router = useRouter();

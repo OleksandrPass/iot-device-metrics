@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { Device } from '../types/device';
 
-const CREATE_DEVICE_API_URL = 'http://51.103.231.79:3000/api/devices';
+const CREATE_DEVICE_API_URL = 'https://vdds-iot.duckdns.org/api/devices';
 
 interface DeviceCreateFormProps {
     token: string;

@@ -58,7 +58,6 @@ const DevicePatchForm: React.FC<DevicePatchFormProps> = ({ device, onClose, onDe
     };
 
     return (
-        /* Replaced modal classes with the inline container styles from Create Form */
         <div className="p-6 border border-gray-400 bg-gray-50 rounded-lg shadow-xl mb-8 w-3/12 mx-auto space-y-4">
             <h3 className="text-lg font-bold mb-4 text-gray-800">Edit Device Details</h3>
 

@@ -15,7 +15,7 @@ const AlertRulesList: React.FC<AlertRulesListProps> = ({ deviceId, token }) => {
 
     const fetchRules = useCallback(async () => {
         try {
-            const response = await fetch(`http://51.103.231.79:3000/api/alert-rules`, {
+            const response = await fetch(`https://vdds-iot.duckdns.org/api/alert-rules`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             if (!response.ok) throw new Error('Failed to fetch rules');
@@ -33,7 +33,7 @@ const AlertRulesList: React.FC<AlertRulesListProps> = ({ deviceId, token }) => {
 
         setDeletingId(ruleId);
         try {
-            const response = await fetch(`http://51.103.231.79:3000/api/alert-rules/${ruleId}`, {
+            const response = await fetch(`https://vdds-iot.duckdns.org/api/alert-rules/${ruleId}`, {
                 method: 'DELETE',
                 headers: { 'Authorization': `Bearer ${token}` }
             });

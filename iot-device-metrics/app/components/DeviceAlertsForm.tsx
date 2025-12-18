@@ -35,7 +35,7 @@ const AlertRuleForm: React.FC<AlertRuleFormProps> = ({ deviceId, token, onClose 
         };
 
         try {
-            const response = await fetch('http://51.103.231.79:3000/api/alert-rules', {
+            const response = await fetch('https://vdds-iot.duckdns.org/api/alert-rules', {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`,

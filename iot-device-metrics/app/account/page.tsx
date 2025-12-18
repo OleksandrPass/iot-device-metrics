@@ -3,8 +3,8 @@
 import { useRouter } from 'next/navigation';
 import React, { useEffect, useState, useCallback } from 'react';
 
-const USER_PROFILE_API_URL = 'http://51.103.231.79:3000/api/users/patch';
-const DELETE_USER_API_URL = 'http://51.103.231.79:3000/api/users';
+const USER_PROFILE_API_URL = 'https://vdds-iot.duckdns.org/api/users/patch';
+const DELETE_USER_API_URL = 'https://vdds-iot.duckdns.org/api/users';
 
 interface UserProfile {
     id: string;
@@ -189,7 +189,7 @@ const AccountPage: React.FC = () => {
             )}
 
             <div className="flex justify-between items-center pb-4 border-b">
-                <h1 className="text-3xl font-bold">👤 My Account</h1>
+                <h1 className="text-3xl font-bold">My Account</h1>
                 <button
                     onClick={() => router.push('/devices')}
                     className="px-4 py-2 bg-gray-500 text-white font-semibold rounded-md shadow hover:bg-gray-700 transition"

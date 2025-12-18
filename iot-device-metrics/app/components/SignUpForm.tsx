@@ -7,7 +7,7 @@ import { RegisterFormData } from '../types/auth';
 import Link from 'next/link';
 
 
-const EXTERNAL_REGISTER_API = 'http://51.103.231.79:3000/api/users';
+const EXTERNAL_REGISTER_API = 'https://vdds-iot.duckdns.org/api/users';
 
 const SignUpForm: React.FC = () => {
     const router = useRouter();
